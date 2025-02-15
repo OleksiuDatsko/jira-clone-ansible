@@ -1,0 +1,65 @@
+- name: Install PostgreSQL
+  apt:
+    pkg:
+      - postgresql-{{ postgresql_version }}
+      - postgresql-contrib-{{ postgresql_version }}
+      - python3-psycopg2
+      - acl
+    state: present
+
+- name: Start and enable the service
+  systemd:
+    name: postgresql
+    state: started
+    enabled: true
+
+- name: Set options
+  community.postgresql.postgresql_set:
+    name: "{{ item.name }}"
+    value: "{{ item.value }}"
+  become: true
+  become_user: postgres
+  loop: "{{ postgresql_options|flatten(levels=1) }}"
+  notify: 
+    - restart_postgresql
+
+- name: Create the database
+  community.postgresql.postgresql_db:
+    name: "{{ postgresql_database }}"
+  become: true
+  become_user: postgres
+
+- name: Create the user
+  community.postgresql.postgresql_user:
+    db: "{{ postgresql_database }}"
+    name: "{{ postgresql_user.name }}"
+    password: "{{ postgresql_user.password }}"
+  become: true
+  become_user: postgres
+
+- name: Set the user privileges
+  community.postgresql.postgresql_privs:
+    type: database
+    database: "{{ postgresql_database }}"
+    roles: "{{ postgresql_user.name }}"
+    grant_option: no
+    privs: all
+    state: present
+  become: true
+  become_user: postgres
+
+- name: Add entries to pg_hba
+  community.postgresql.postgresql_pg_hba:
+    dest: "/etc/postgresql/{{ postgresql_version }}/main/pg_hba.conf"
+    address: all
+    contype: host
+    databases: "{{  postgresql_database  }}"
+    method: scram-sha-256
+    users: "{{ postgresql_user.name }}"
+  become: true
+  become_user: postgres
+  notify: 
+    - restart_postgresql
+
+
+

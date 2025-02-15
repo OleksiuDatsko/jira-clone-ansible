@@ -1,0 +1,12 @@
+postgresql_host: "db"
+upstash_host: "upstash"
+
+nodejs_version: 20
+
+app_name: "app"
+apps_group: "apps"
+apps_user: "apps"
+apps_home: "/home/apps"
+
+git_repo_url: "https://github.com/cycleglorious/jira_clone.git"
+source_code_path: "{{ apps_home }}/jira_clone"

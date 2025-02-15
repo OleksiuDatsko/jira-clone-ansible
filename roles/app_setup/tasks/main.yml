@@ -1,0 +1,83 @@
+- name: Install the GPG key for Node.js LTS
+  apt_key:
+    url: "https://deb.nodesource.com/gpgkey/nodesource.gpg.key"
+    state: present
+
+- name: Install the Node.js LTS repository
+  apt_repository:
+    repo: "deb https://deb.nodesource.com/node_{{ nodejs_version }}.x {{ ansible_distribution_release }} main"
+    state: present
+    update_cache: yes
+
+- name: Install Node.js
+  apt:
+    pkg:
+      - nodejs
+    state: present
+
+- name: Clone source code
+  git:
+    repo: "{{ git_repo_url }}"
+    dest: "{{ source_code_path }}"
+
+- name: Create .env file for configs
+  template:
+    src: env.j2
+    dest: "{{ source_code_path }}/.env"
+
+- name: Install project dependencies
+  community.general.npm:
+    path: "{{ source_code_path }}"
+
+- name: Migrate the database
+  command:
+    cmd: npx prisma db push
+    chdir: "{{ source_code_path }}"
+
+- name: Seed the database
+  command:
+    cmd: npx prisma db seed
+    chdir: "{{ source_code_path }}"
+
+- name: Build the app
+  command:
+    cmd: npm run build
+    chdir: "{{ source_code_path }}"
+  args:
+    creates: "{{ source_code_path }}/.next"
+
+- name: Install PM2 globally
+  community.general.npm:
+    name: pm2
+    global: true
+    state: present
+
+- name: Delete all PM2 services (if they exist)
+  command:
+    cmd: pm2 delete all
+    chdir: "{{ source_code_path }}"
+  become: true
+  ignore_errors: true 
+
+- name: Start the app with PM2
+  command:
+    cmd: pm2 start npm --name "{{ app_name }}" -- start
+    chdir: "{{ source_code_path }}"
+  become: true
+
+- name: Enable PM2 startup
+  command:
+    cmd: pm2 startup systemd --hp "{{ apps_home }}"
+  become: true
+
+- name: Save the PM2 process list
+  command:
+    cmd: pm2 save
+  become: true
+
+- name: Ensure PM2 systemd service is enabled and running
+  systemd:
+    name: "pm2-root.service"
+    enabled: yes
+    state: restarted
+  become: true

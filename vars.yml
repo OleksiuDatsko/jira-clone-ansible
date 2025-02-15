@@ -1,0 +1,6 @@
+postgresql_database: db
+postgresql_user:
+  name: dbuser
+  password: "{{ vault_postgresql_user_password }}"
+
+upstash_port: 8079

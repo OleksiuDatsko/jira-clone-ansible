@@ -1,0 +1,15 @@
+services:
+  redis:
+    image: redis
+    ports:
+      - "6379:6379"
+    restart: always
+  serverless-redis-http:
+    ports:
+      - "{{ upstash_port }}:80"
+    image: hiett/serverless-redis-http:latest
+    environment:
+      SRH_MODE: env
+      SRH_TOKEN: {{ vault_upstash_token }}
+      SRH_CONNECTION_STRING: "redis://redis:6379" # Using `redis` hostname since they're in the same Docker network.
+    restart: always

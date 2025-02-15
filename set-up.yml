@@ -1,0 +1,39 @@
+---
+- name: Set up
+  hosts: all
+  become: true
+  pre_tasks:
+    - name: Update apt cache
+      apt:
+        pkg:
+          - acl
+        update_cache: true
+      changed_when: false
+
+- name: Set up Upstash
+  hosts: upstash_server
+  vars_files:
+  - secrets.vault
+  - vars.yml 
+  become: true
+  roles:
+    - upstash_setup
+
+- name: Set up Postgres DB
+  hosts: db_server
+  vars_files:
+    - secrets.vault
+    - vars.yml 
+  become: true
+  roles:
+    - db_setup
+    
+- name: Set up app
+  hosts: app_server
+  vars_files:
+    - secrets.vault
+    - vars.yml 
+  become: true
+  roles:
+    - app_setup
+
