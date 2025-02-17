@@ -5,8 +5,6 @@
   pre_tasks:
     - name: Update apt cache
       apt:
-        pkg:
-          - acl
         update_cache: true
       changed_when: false
 
@@ -37,3 +35,9 @@
   roles:
     - app_setup
 
+- name: Set up proxy
+  hosts: proxy_server
+  vars_files:
+  become: true
+  roles:
+    - proxy_setup

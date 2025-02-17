@@ -4,7 +4,6 @@
       - postgresql-{{ postgresql_version }}
       - postgresql-contrib-{{ postgresql_version }}
       - python3-psycopg2
-      - acl
     state: present
 
 - name: Start and enable the service

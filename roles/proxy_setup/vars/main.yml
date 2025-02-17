@@ -1,0 +1,3 @@
+upstream_hosts:
+  - "app:3000"
+  - "app2:3000"

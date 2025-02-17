@@ -1,0 +1,13 @@
+- name: Install NGINX
+  include_role:
+    name: nginxinc.nginx
+    
+- name: Create Nginx configuration 
+  become: true
+  template:
+    src: nginx.conf.j2
+    dest: /etc/nginx/sites-available/default
+    owner: root
+    group: root
+  notify: 
+    - restart_nginx

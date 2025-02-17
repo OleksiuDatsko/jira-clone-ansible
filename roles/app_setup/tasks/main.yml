@@ -15,10 +15,35 @@
       - nodejs
     state: present
 
+- name: Create a new group with name apps
+  group:
+    name: apps
+    state: present
+
+- name: Create a new user with name apps
+  user:
+    name: apps
+    groups: apps
+    append: true
+    shell: /bin/bash
+    state: present
+    home: /home/apps
+  become: true
+
+- name: Ensure home directory for apps user exists
+  file:
+    path: /home/apps
+    state: directory
+    owner: apps
+    group: apps
+    mode: '0755'
+  become: true
+
 - name: Clone source code
   git:
     repo: "{{ git_repo_url }}"
     dest: "{{ source_code_path }}"
+  become_user: apps
 
 - name: Create .env file for configs
   template:
@@ -33,11 +58,13 @@
   command:
     cmd: npx prisma db push
     chdir: "{{ source_code_path }}"
+  run_once: true
 
 - name: Seed the database
   command:
     cmd: npx prisma db seed
     chdir: "{{ source_code_path }}"
+  run_once: true
 
 - name: Build the app
   command:
@@ -45,6 +72,7 @@
     chdir: "{{ source_code_path }}"
   args:
     creates: "{{ source_code_path }}/.next"
+  become_user: apps
 
 - name: Install PM2 globally
   community.general.npm:
@@ -63,21 +91,24 @@
   command:
     cmd: pm2 start npm --name "{{ app_name }}" -- start
     chdir: "{{ source_code_path }}"
-  become: true
+  become_user: apps
+
 
 - name: Enable PM2 startup
   command:
-    cmd: pm2 startup systemd --hp "{{ apps_home }}"
+    cmd: pm2 startup systemd -u apps --hp "{{ apps_home }}"
   become: true
 
 - name: Save the PM2 process list
   command:
     cmd: pm2 save
-  become: true
+  become_user: apps
 
 - name: Ensure PM2 systemd service is enabled and running
   systemd:
-    name: "pm2-root.service"
-    enabled: yes
-    state: restarted
+    name: "pm2-apps.service"
+    enabled: yes 
   become: true
+
+- name: Reboot the server
+  reboot:

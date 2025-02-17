@@ -1,0 +1,17 @@
+---
+- name: Set up
+  hosts: app_server
+  gather_facts: false
+  tasks:
+    - name: run task on first app server
+      vars:
+        is_used: true
+      command: hostname
+      run_once: true
+      register: data
+      when:
+        - is_used == true
+
+    - name: debug data
+      debug:
+        var: data 
