@@ -1,0 +1,10 @@
+---
+- name: Set up Upstash
+  hosts: upstash_server
+  vars_files:
+    - secrets.vault
+    - vars.yml
+  become: true
+  roles:
+    - common
+    - upstash_setup

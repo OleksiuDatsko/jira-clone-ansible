@@ -1,0 +1,12 @@
+---
+- name: Set up Upstash
+  ansible.builtin.import_playbook: upstashservers.yml
+
+- name: Set up Postgres DB
+  ansible.builtin.import_playbook: dbservers.yml
+
+- name: Set up app
+  ansible.builtin.import_playbook: appservers.yml
+
+- name: Set up proxy
+  ansible.builtin.import_playbook: proxyservers.yml

@@ -1,0 +1,4 @@
+postgresql_version: 14
+postgresql_options:
+  - name: "listen_addresses"
+    value: "*"

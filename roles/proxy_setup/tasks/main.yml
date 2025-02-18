@@ -1,13 +1,20 @@
 - name: Install NGINX
-  include_role:
+  ansible.builtin.include_role:
     name: nginxinc.nginx
-    
-- name: Create Nginx configuration 
+
+- name: Remove default Nginx site configuration
   become: true
-  template:
+  ansible.builtin.file:
+    path: /etc/nginx/conf.d/default.conf
+    state: absent
+  notify:
+    - Restart nginx
+
+- name: Create Nginx configuration
+  become: true
+  ansible.builtin.template:
     src: nginx.conf.j2
-    dest: /etc/nginx/sites-available/default
-    owner: root
-    group: root
-  notify: 
-    - restart_nginx
+    dest: /etc/nginx/conf.d/jira-clone.conf
+    mode: '0644'
+  notify:
+    - Restart nginx

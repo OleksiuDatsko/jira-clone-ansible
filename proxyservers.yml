@@ -1,0 +1,7 @@
+---
+- name: Set up proxy
+  hosts: proxy_server
+  become: true
+  roles:
+    - common
+    - proxy_setup

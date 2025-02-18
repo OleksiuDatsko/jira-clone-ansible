@@ -1,0 +1,23 @@
+- name: Create a new group with name {{ apps_group }}
+  ansible.builtin.group:
+    name: "{{ apps_group }}"
+    state: present
+
+- name: Create a new user with name {{ apps_user }}
+  ansible.builtin.user:
+    name: "{{ apps_user }}"
+    groups: "{{ apps_group }}"
+    append: true
+    shell: /bin/bash
+    state: present
+    home: "{{ apps_home }}"
+  become: true
+
+- name: Home directory for user {{ apps_user }}
+  ansible.builtin.file:
+    path: "{{ apps_home }}"
+    state: directory
+    owner: "{{ apps_user }}"
+    group: "{{ apps_group }}"
+    mode: '0755'
+  become: true

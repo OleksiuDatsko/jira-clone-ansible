@@ -1,0 +1,45 @@
+- name: Install PM2 globally
+  community.general.npm:
+    name: pm2
+    global: true
+    state: present
+
+- name: Check if app already exists
+  become_user: "{{ apps_user }}"
+  ansible.builtin.command:
+    cmd: pm2 pid
+  register: app_exists
+
+- name: Start the app with PM2
+  become_user: "{{ apps_user }}"
+  ansible.builtin.command:
+    cmd: pm2 start server.js --name "{{ app_name }}"
+    chdir: "{{ artifact_path }}"
+  when: not app_exists.stdout
+
+- name: Restart the app with PM2
+  become_user: "{{ apps_user }}"
+  ansible.builtin.command:
+    cmd: pm2 restart "{{ app_name }}"
+    chdir: "{{ artifact_path }}"
+  when: app_exists.stdout
+
+- name: Enable PM2 startup
+  ansible.builtin.command:
+    cmd: pm2 startup systemd -u "{{ apps_user }}" --hp "{{ apps_home }}"
+  become: true
+
+- name: Save the PM2 process list
+  become_user: "{{ apps_user }}"
+  ansible.builtin.command:
+    cmd: pm2 save
+
+- name: Ensure PM2 systemd service is enabled and running
+  ansible.builtin.systemd:
+    name: "pm2-{{ apps_user }}.service"
+    enabled: true
+  become: true
+
+- name: Reboot the server
+  ansible.builtin.reboot:
+  when: not app_exists.stdout

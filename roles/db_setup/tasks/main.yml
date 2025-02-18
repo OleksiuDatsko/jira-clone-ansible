@@ -1,5 +1,5 @@
 - name: Install PostgreSQL
-  apt:
+  ansible.builtin.apt:
     pkg:
       - postgresql-{{ postgresql_version }}
       - postgresql-contrib-{{ postgresql_version }}
@@ -7,7 +7,7 @@
     state: present
 
 - name: Start and enable the service
-  systemd:
+  ansible.builtin.systemd:
     name: postgresql
     state: started
     enabled: true
@@ -19,8 +19,8 @@
   become: true
   become_user: postgres
   loop: "{{ postgresql_options|flatten(levels=1) }}"
-  notify: 
-    - restart_postgresql
+  notify:
+    - Restart postgresql
 
 - name: Create the database
   community.postgresql.postgresql_db:
@@ -41,7 +41,7 @@
     type: database
     database: "{{ postgresql_database }}"
     roles: "{{ postgresql_user.name }}"
-    grant_option: no
+    grant_option: false
     privs: all
     state: present
   become: true
@@ -57,8 +57,5 @@
     users: "{{ postgresql_user.name }}"
   become: true
   become_user: postgres
-  notify: 
-    - restart_postgresql
-
-
-
+  notify:
+    - Restart postgresql

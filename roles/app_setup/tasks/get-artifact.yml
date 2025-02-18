@@ -1,0 +1,25 @@
+- name: Install unzip
+  ansible.builtin.apt:
+    name: unzip
+    state: present
+
+- name: Create folder
+  ansible.builtin.file:
+    path: "{{ artifact_path }}"
+    state: directory
+    owner: "{{ apps_user }}"
+    mode: '0755'
+
+- name: Get artifact
+  become: true
+  ansible.builtin.unarchive:
+    src: app.zip
+    dest: "{{ artifact_path }}"
+
+- name: Create .env file for configs
+  ansible.builtin.template:
+    src: env.j2
+    dest: "{{ artifact_path }}/.env"
+    owner: "{{ apps_user }}"
+    group: "{{ apps_group }}"
+    mode: '0644'

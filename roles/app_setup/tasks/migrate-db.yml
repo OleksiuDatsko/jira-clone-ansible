@@ -1,0 +1,35 @@
+- name: Clone source code
+  ansible.builtin.git:
+    repo: "{{ git_repo_url }}"
+    dest: "{{ source_code_path }}"
+    version: "main"
+
+- name: Install project dependencies
+  community.general.npm:
+    path: "{{ source_code_path }}"
+
+- name: Create .env file for configs
+  ansible.builtin.template:
+    src: env.j2
+    dest: "{{ source_code_path }}/.env"
+    mode: '0644'
+
+- name: Migrate the database
+  ansible.builtin.command:
+    cmd: npx prisma db push
+    chdir: "{{ source_code_path }}"
+  when: migrate
+  changed_when: "'database is already in sync' not in {{ stdout }}"
+
+- name: Seed the database
+  ansible.builtin.command:
+    cmd: npx prisma db seed
+    chdir: "{{ source_code_path }}"
+  when: seed
+  changed_when: true
+
+- name: Remove folder with source code
+  ansible.builtin.file:
+    path: "{{ source_code_path }}"
+    state: absent
+  become: true
