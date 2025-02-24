@@ -1,12 +1,39 @@
 ---
-- name: Set up Upstash
-  ansible.builtin.import_playbook: upstashservers.yml
-
-- name: Set up Postgres DB
-  ansible.builtin.import_playbook: dbservers.yml
+- name: Run common set up
+  hosts: all
+  become: true
+  roles:
+    - common
 
 - name: Set up app
-  ansible.builtin.import_playbook: appservers.yml
+  hosts: app_server
+  vars_files:
+    - secrets.vault
+    - vars.yml
+  become: true
+  roles:
+    - app_setup
+
+- name: Set up Postgres DB
+  hosts: db_server
+  vars_files:
+    - secrets.vault
+    - vars.yml
+  become: true
+  roles:
+    - db_setup
+
+- name: Set up Upstash
+  hosts: upstash_server
+  vars_files:
+    - secrets.vault
+    - vars.yml
+  become: true
+  roles:
+    - upstash_setup
 
 - name: Set up proxy
-  ansible.builtin.import_playbook: proxyservers.yml
+  hosts: proxy_server
+  become: true
+  roles:
+    - proxy_setup
