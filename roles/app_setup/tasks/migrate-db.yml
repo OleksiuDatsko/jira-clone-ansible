@@ -3,6 +3,7 @@
     repo: "{{ git_repo_url }}"
     dest: "{{ source_code_path }}"
     version: "main"
+  become_user: "{{ apps_user }}"
 
 - name: Install project dependencies
   community.general.npm:
@@ -19,7 +20,6 @@
     cmd: npx prisma db push
     chdir: "{{ source_code_path }}"
   when: migrate
-  changed_when: "'database is already in sync' not in {{ stdout }}"
 
 - name: Seed the database
   ansible.builtin.command:

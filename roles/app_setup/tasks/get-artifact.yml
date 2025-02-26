@@ -8,13 +8,17 @@
     path: "{{ artifact_path }}"
     state: directory
     owner: "{{ apps_user }}"
-    mode: '0755'
+    group: "{{ apps_group }}"
+    mode: '0644'
 
 - name: Get artifact
   become: true
   ansible.builtin.unarchive:
-    src: app.zip
+    src: "{{ artifact_name }}"
     dest: "{{ artifact_path }}"
+    owner: "{{ apps_user }}"
+    group: "{{ apps_group }}"
+    mode: '0644'
 
 - name: Create .env file for configs
   ansible.builtin.template:

@@ -1,5 +1,6 @@
 ---
 - name: Run common set up
+  tags: always
   hosts: all
   become: true
   roles:
@@ -7,6 +8,7 @@
 
 
 - name: Set up Postgres DB
+  tags: db
   hosts: db_server
   vars_files:
     - secrets.vault
@@ -16,6 +18,7 @@
     - db_setup
 
 - name: Set up Upstash
+  tags: upstash
   hosts: upstash_server
   vars_files:
     - secrets.vault
@@ -25,6 +28,7 @@
     - upstash_setup
 
 - name: Set up app
+  tags: app
   hosts: app_server
   vars_files:
     - secrets.vault
@@ -34,6 +38,7 @@
     - app_setup
 
 - name: Set up proxy
+  tags: proxy
   hosts: proxy_server
   become: true
   roles:
