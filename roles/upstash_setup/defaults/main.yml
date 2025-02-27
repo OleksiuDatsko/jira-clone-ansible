@@ -1,1 +1,2 @@
 upstash_port: 8079
+upstash_token: "{{ vault_upstash_token }}"

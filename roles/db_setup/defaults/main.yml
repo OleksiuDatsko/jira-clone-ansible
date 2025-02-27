@@ -2,3 +2,8 @@ postgresql_version: 14
 postgresql_options:
   - name: "listen_addresses"
     value: "*"
+
+postgresql_database: db
+postgresql_user:
+  name: dbuser
+  password: "{{ vault_postgresql_user_password }}"
