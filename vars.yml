@@ -4,3 +4,4 @@ postgresql_user:
   password: "{{ vault_postgresql_user_password }}"
 
 upstash_port: 8079
+upstash_token: "{{ vault_upstash_token }}"
