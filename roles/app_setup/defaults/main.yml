@@ -19,3 +19,6 @@ artifact_name: "{{ app_name }}.zip"
 
 upstash_port: 8079
 upstash_token: "{{ vault_upstash_token }}"
+
+next_public_clerk_publishable_key: "{{ vault_next_public_clerk_publishable_key }}"
+clerk_secret_key: "{{ vault_clerk_secret_key }}"

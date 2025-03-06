@@ -18,7 +18,7 @@
     value: "{{ item.value }}"
   become: true
   become_user: postgres
-  loop: "{{ postgresql_options|flatten(levels=1) }}"
+  loop: "{{ postgresql_options | flatten(levels=1) }}"
   notify:
     - Restart postgresql
 
